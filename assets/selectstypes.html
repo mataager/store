@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elegant Custom Select</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --transition-time: 0.4s;
+            --transition-type: cubic-bezier(0.4, 0, 0.2, 1);
+            --primary-color: #4e73df;
+            --secondary-color: #6c757d;
+            --success-color: #1cc88a;
+            --background-color: #f8f9fa;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+            --hover-color: #e9ecef;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            color: #343a40;
+        }
+
+        .header p {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        /* Elegant Select Container */
+        .elegant-select-container {
+            position: relative;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+
+        .elegant-select {
+            position: relative;
+            width: 100%;
+        }
+
+        .select-selected {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1rem 1.2rem;
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid var(--border-color);
+            transition: all var(--transition-time) var(--transition-type);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .select-selected:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(78, 115, 223, 0.1);
+        }
+
+        .select-selected:after {
+            content: "";
+            width: 0.5rem;
+            height: 0.5rem;
+            border-right: 2px solid var(--text-color);
+            border-bottom: 2px solid var(--text-color);
+            transform: rotate(45deg);
+            transition: all var(--transition-time) var(--transition-type);
+        }
+
+        .select-selected.select-arrow-active:after {
+            transform: rotate(-135deg);
+            margin-top: -4px;
+        }
+
+        .select-selected.select-arrow-active {
+            border-radius: 8px 8px 0 0;
+            border-bottom: 1px solid transparent;
+        }
+
+        /* Select Items */
+        .select-items {
+            position: absolute;
+            background-color: white;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 99;
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all var(--transition-time) var(--transition-type);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--primary-color);
+            border-top: none;
+        }
+
+        .select-items.open {
+            max-height: 300px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .select-item {
+            padding: 1rem 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s var(--transition-type);
+            border-bottom: 1px solid #f1f3f5;
+            display: flex;
+            align-items: center;
+        }
+
+        .select-item:last-child {
+            border-bottom: none;
+        }
+
+        .select-item:hover {
+            background-color: var(--hover-color);
+        }
+
+        .select-item.selected {
+            background-color: rgba(78, 115, 223, 0.1);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .select-item .icon {
+            margin-right: 0.8rem;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            background-color: rgba(78, 115, 223, 0.1);
+            color: var(--primary-color);
+        }
+
+        /* Select with search */
+        .select-search-container {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: #f8f9fa;
+        }
+
+        .select-search {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .select-search:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.2);
+        }
+
+        /* Different styles */
+        .elegant-select.minimal .select-selected {
+            background-color: transparent;
+            border: none;
+            border-bottom: 2px solid var(--border-color);
+            border-radius: 0;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .elegant-select.filled .select-selected {
+            background-color: #f8f9fa;
+            border: none;
+        }
+
+        /* Color variants */
+        .elegant-select.primary .select-selected:hover,
+        .elegant-select.primary .select-selected.select-arrow-active {
+            border-color: var(--primary-color);
+        }
+
+        .elegant-select.success .select-selected:hover,
+        .elegant-select.success .select-selected.select-arrow-active {
+            border-color: var(--success-color);
+        }
+
+        /* Demo sections */
+        .demo-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .demo-section h3 {
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--border-color);
+            color: #495057;
+            font-weight: 400;
+        }
+
+        .section-description {
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Elegant Custom Select</h1>
+            <p>A beautifully designed select input with smooth animations</p>
+        </div>
+
+        <div class="demo-section">
+            <h3>Standard Select</h3>
+            <p class="section-description">A clean, modern select input with smooth transitions. Click again on an open
+                select to close it.</p>
+
+            <div class="elegant-select-container">
+                <div class="elegant-select">
+                    <div class="select-selected" id="standardSelect">
+                        <span>Choose an option</span>
+                    </div>
+                    <div class="select-items" id="standardSelectItems">
+                        <div class="select-item" data-value="option1">
+                            <div class="icon"><i class="bi bi-heart"></i></div>
+                            <span>Option One</span>
+                        </div>
+                        <div class="select-item" data-value="option2">
+                            <div class="icon"><i class="bi bi-star"></i></div>
+                            <span>Option Two</span>
+                        </div>
+                        <div class="select-item" data-value="option3">
+                            <div class="icon"><i class="bi bi-bookmark"></i></div>
+                            <span>Option Three</span>
+                        </div>
+                        <div class="select-item" data-value="option4">
+                            <div class="icon"><i class="bi bi-flag"></i></div>
+                            <span>Option Four</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>Select with Search</h3>
+            <p class="section-description">A select input with filtering capability.</p>
+
+            <div class="elegant-select-container">
+                <div class="elegant-select">
+                    <div class="select-selected" id="searchSelect">
+                        <span>Select a country</span>
+                    </div>
+                    <div class="select-items" id="searchSelectItems">
+                        <div class="select-search-container">
+                            <input type="text" class="select-search" placeholder="Search countries...">
+                        </div>
+                        <div class="select-item" data-value="usa">
+                            <div class="icon"><i class="bi bi-globe"></i></div>
+                            <span>United States</span>
+                        </div>
+                        <div class="select-item" data-value="canada">
+                            <div class="icon"><i class="bi bi-globe"></i></div>
+                            <span>Canada</span>
+                        </div>
+                        <div class="select-item" data-value="uk">
+                            <div class="icon"><i class="bi bi-globe"></i></div>
+                            <span>United Kingdom</span>
+                        </div>
+                        <div class="select-item" data-value="australia">
+                            <div class="icon"><i class="bi bi-globe"></i></div>
+                            <span>Australia</span>
+                        </div>
+                        <div class="select-item" data-value="germany">
+                            <div class="icon"><i class="bi bi-globe"></i></div>
+                            <span>Germany</span>
+                        </div>
+                        <div class="select-item" data-value="japan">
+                            <div class="icon"><i class="bi bi-globe"></i></div>
+                            <span>Japan</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h3>Style Variations</h3>
+            <p class="section-description">Different styles to match your design system.</p>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Minimal Style</label>
+                    <div class="elegant-select minimal">
+                        <div class="select-selected" id="minimalSelect">
+                            <span>Minimal select</span>
+                        </div>
+                        <div class="select-items">
+                            <div class="select-item" data-value="min1">Minimal Option 1</div>
+                            <div class="select-item" data-value="min2">Minimal Option 2</div>
+                            <div class="select-item" data-value="min3">Minimal Option 3</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Filled Style</label>
+                    <div class="elegant-select filled">
+                        <div class="select-selected" id="filledSelect">
+                            <span>Filled select</span>
+                        </div>
+                        <div class="select-items">
+                            <div class="select-item" data-value="fill1">Filled Option 1</div>
+                            <div class="select-item" data-value="fill2">Filled Option 2</div>
+                            <div class="select-item" data-value="fill3">Filled Option 3</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Primary Color</label>
+                    <div class="elegant-select primary">
+                        <div class="select-selected" id="primarySelect">
+                            <span>Primary select</span>
+                        </div>
+                        <div class="select-items">
+                            <div class="select-item" data-value="pri1">Primary Option 1</div>
+                            <div class="select-item" data-value="pri2">Primary Option 2</div>
+                            <div class="select-item" data-value="pri3">Primary Option 3</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Success Color</label>
+                    <div class="elegant-select success">
+                        <div class="select-selected" id="successSelect">
+                            <span>Success select</span>
+                        </div>
+                        <div class="select-items">
+                            <div class="select-item" data-value="suc1">Success Option 1</div>
+                            <div class="select-item" data-value="suc2">Success Option 2</div>
+                            <div class="select-item" data-value="suc3">Success Option 3</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Elegant Custom Select Input • Designed with smooth animations</p>
+        </div>
+    </div>
+
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize all select elements
+            const selects = document.querySelectorAll('.elegant-select');
+
+            selects.forEach(select => {
+                const selected = select.querySelector('.select-selected');
+                const itemsContainer = select.querySelector('.select-items');
+                const items = itemsContainer.querySelectorAll('.select-item');
+                const searchInput = itemsContainer.querySelector('.select-search');
+
+                // Toggle select on click
+                selected.addEventListener('click', function (e) {
+                    e.stopPropagation();
+
+                    // Check if this select is already open
+                    const isAlreadyOpen = itemsContainer.classList.contains('open');
+
+                    // Close all selects first
+                    closeAllSelects();
+
+                    // If it wasn't already open, open it
+                    if (!isAlreadyOpen) {
+                        itemsContainer.classList.add('open');
+                        selected.classList.add('select-arrow-active');
+
+                        // Focus search input if it exists
+                        if (searchInput) {
+                            setTimeout(() => searchInput.focus(), 10);
+                        }
+                    }
+                });
+
+                // Handle item selection
+                items.forEach(item => {
+                    item.addEventListener('click', function () {
+                        const value = this.getAttribute('data-value');
+                        const text = this.textContent;
+
+                        // Update selected text
+                        selected.querySelector('span').textContent = text;
+
+                        // Mark as selected
+                        items.forEach(i => i.classList.remove('selected'));
+                        this.classList.add('selected');
+
+                        // Close dropdown
+                        itemsContainer.classList.remove('open');
+                        selected.classList.remove('select-arrow-active');
+
+                        // Trigger change event
+                        const event = new Event('change');
+                        selected.dispatchEvent(event);
+
+                        console.log(`Selected value: ${value}, text: ${text}`);
+                    });
+                });
+
+                // Handle search functionality
+                if (searchInput) {
+                    searchInput.addEventListener('input', function () {
+                        const searchTerm = this.value.toLowerCase();
+
+                        items.forEach(item => {
+                            if (item.textContent.toLowerCase().includes(searchTerm)) {
+                                item.style.display = 'flex';
+                            } else {
+                                item.style.display = 'none';
+                            }
+                        });
+                    });
+
+                    // Prevent search input click from closing dropdown
+                    searchInput.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                    });
+                }
+            });
+
+            // Close selects when clicking outside
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('.elegant-select')) {
+                    closeAllSelects();
+                }
+            });
+
+            // Close all select dropdowns
+            function closeAllSelects() {
+                const allSelects = document.querySelectorAll('.select-items, .select-selected');
+
+                allSelects.forEach(element => {
+                    if (element.classList.contains('select-items')) {
+                        element.classList.remove('open');
+                        // Clear search if exists
+                        const searchInput = element.querySelector('.select-search');
+                        if (searchInput) {
+                            searchInput.value = '';
+                            // Show all items again
+                            element.querySelectorAll('.select-item').forEach(item => {
+                                item.style.display = 'flex';
+                            });
+                        }
+                    } else if (element.classList.contains('select-selected')) {
+                        element.classList.remove('select-arrow-active');
+                    }
+                });
+            }
+
+            // Keyboard navigation
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    closeAllSelects();
+                }
+            });
+        });
+   
+   </script>
+</body>
+
+</html>

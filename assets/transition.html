@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smooth Height Transitions</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --transition-time: 0.4s;
+            --transition-type: cubic-bezier(0.4, 0, 0.2, 1);
+            --primary-color: #4e73df;
+            --secondary-color: #6c757d;
+            --success-color: #1cc88a;
+        }
+
+        /* Universal transition base */
+        .transition-element {
+            transition: all var(--transition-time) var(--transition-type) !important;
+        }
+
+        /* Section transitions */
+        .section-container {
+            transition: all var(--transition-time) var(--transition-type) !important;
+            overflow: hidden;
+        }
+
+        .collapsible-section {
+            transition:
+                max-height var(--transition-time) var(--transition-type),
+                opacity calc(var(--transition-time) * 0.8) var(--transition-type),
+                transform calc(var(--transition-time) * 0.8) var(--transition-type) !important;
+            transform-origin: top center;
+        }
+
+        .hidden-section {
+            opacity: 0;
+            transform: translateY(-8px) scaleY(0.98);
+            max-height: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .visible-section {
+            opacity: 1;
+            transform: translateY(0) scaleY(1);
+            max-height: 1000px;
+            pointer-events: all;
+        }
+
+        /* Button transitions */
+        .btn {
+            transition: all 0.25s var(--transition-type) !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Form element transitions */
+        .form-control,
+        .form-select,
+        .form-check-input {
+            transition: all 0.25s var(--transition-type) !important;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* Card transitions */
+        .card {
+            transition: all 0.3s var(--transition-type) !important;
+        }
+
+        /* Navigation transitions */
+        .nav-link {
+            transition: all 0.25s var(--transition-type) !important;
+        }
+
+        /* Fade in elements on page load */
+        .fade-in {
+            animation: fadeIn 0.6s var(--transition-type) forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Custom color-size controls */
+        .color-size-controls {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .color-section,
+        .size-section {
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .toggle-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .color-display {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            transition: all 0.2s ease;
+        }
+
+        .color-display:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .elegant-color-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .size-inputs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .exceptions-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .exception-tag {
+            display: inline-flex;
+            align-items: center;
+            background-color: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .exception-tag:hover {
+            background-color: #dee2e6;
+            transform: translateY(-1px);
+        }
+
+        .exception-tag .remove {
+            margin-left: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .exception-tag .remove:hover {
+            color: #dc3545;
+            transform: scale(1.2);
+        }
+
+        .size-preview {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .exception-chip {
+            display: inline-block;
+            padding: 2px 8px;
+            background-color: #e9ecef;
+            border-radius: 12px;
+            margin: 2px;
+            font-size: 0.85em;
+            transition: all 0.2s ease;
+        }
+
+        .exception-chip:hover {
+            background-color: #dee2e6;
+        }
+
+        /* Page layout styling */
+        header {
+            background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .theme-controls {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            transition: all 0.3s var(--transition-type);
+        }
+
+        /* Smooth height transition helper */
+        .height-transition {
+            transition: height 0.4s var(--transition-type) !important;
+            overflow: hidden;
+        }
+
+        /* Enhanced button styles */
+        .btn-enhanced {
+            position: relative;
+            overflow: hidden;
+            transform: translateZ(0);
+        }
+
+        .btn-enhanced:after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn-enhanced:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+
+            20% {
+                transform: scale(15, 15);
+                opacity: 0.3;
+            }
+
+            100% {
+                transform: scale(30, 30);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="text-center">
+        <div class="container">
+            <h1 class="fade-in">Smooth Height Transitions</h1>
+            <p class="lead fade-in">Enhanced with optimized animations</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="theme-controls card fade-in">
+            <div class="card-body">
+                <h5 class="card-title">Transition Customization</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="transitionSpeed" class="form-label">Transition Speed</label>
+                        <input type="range" class="form-range" id="transitionSpeed" min="0.2" max="0.8" step="0.1"
+                            value="0.4">
+                        <div class="form-text" id="speedValue">0.4s</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="transitionType" class="form-label">Transition Type</label>
+                        <select class="form-select" id="transitionType">
+                            <option value="cubic-bezier(0.4, 0, 0.2, 1)" selected>Standard (Recommended)</option>
+                            <option value="ease">Ease</option>
+                            <option value="ease-in">Ease-in</option>
+                            <option value="ease-out">Ease-out</option>
+                            <option value="ease-in-out">Ease-in-out</option>
+                            <option value="linear">Linear</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button id="applyToAll" class="btn btn-primary mt-4 btn-enhanced">Apply to Entire Page</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="color-size-controls mt-4 fade-in">
+            <div class="color-section section-container">
+                <label>Color Selection</label>
+                <div class="toggle-buttons">
+                    <button type="button" class="btn btn-sm btn-outline-primary toggle-color-mode active btn-enhanced"
+                        data-mode="picker">
+                        <i class="bi bi-eyedropper"></i> Color Picker
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary toggle-color-mode btn-enhanced"
+                        data-mode="image">
+                        <i class="bi bi-image"></i> From Image
+                    </button>
+                </div>
+
+                <div class="color-picker-container collapsible-section visible-section">
+                    <div class="elegant-color-input">
+                        <div class="color-display" style="background-color: #4e73df"></div>
+                        <input type="text" class="form-control color-name" placeholder="Color Name" value="Blue">
+                    </div>
+                </div>
+
+                <div class="color-image-container collapsible-section hidden-section">
+                    <p>Select an image to use as color source:</p>
+                    <div class="image-swatches"></div>
+                </div>
+            </div>
+
+            <div class="size-section section-container">
+                <label>Size Selection</label>
+                <div class="toggle-buttons">
+                    <button type="button" class="btn btn-sm btn-outline-primary size-toggle-btn active btn-enhanced"
+                        data-target="size-creator">
+                        <i class="bi bi-plus"></i> Create New Package
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary size-toggle-btn btn-enhanced"
+                        data-target="package-selector">
+                        <i class="bi bi-collection"></i> Choose a Package
+                    </button>
+                </div>
+
+                <div class="package-selector collapsible-section hidden-section">
+                    <select class="form-select package-select">
+                        <option value="">Select Package</option>
+                        <option value="men shose">men shose (40-45)</option>
+                        <option value="me shose 1">me shose 1 (35-45)</option>
+                        <option value="men shose 2">men shose 2 (40-45)</option>
+                        <option value="ff">ff (35-45)</option>
+                    </select>
+                    <div class="size-preview"></div>
+                </div>
+
+                <div class="size-creator collapsible-section visible-section">
+                    <label class="form-label">Create New Size Range</label>
+                    <div class="size-inputs">
+                        <input type="text" class="form-control from-size" placeholder="From">
+                        <input type="text" class="form-control to-size" placeholder="To">
+                    </div>
+
+                    <div class="exceptions-creator">
+                        <label class="form-label">Add Exceptions:</label>
+                        <div class="exceptions-input">
+                            <input type="text" class="form-control exception-value" placeholder="Size value">
+                            <button class="btn btn-sm btn-primary add-exception btn-enhanced">Add</button>
+                        </div>
+                        <div class="exceptions-list-creator"></div>
+                    </div>
+
+                    <button class="btn btn-primary save-size mt-3 btn-enhanced">Save Size Range</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4 fade-in">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Testing Height Transitions</h5>
+                        <p>Click the buttons below to test different height transition examples:</p>
+
+                        <div class="d-flex gap-2 mb-3">
+                            <button class="btn btn-primary test-height-btn btn-enhanced" data-height="100">Small
+                                Height</button>
+                            <button class="btn btn-primary test-height-btn btn-enhanced" data-height="200">Medium
+                                Height</button>
+                            <button class="btn btn-primary test-height-btn btn-enhanced" data-height="300">Large
+                                Height</button>
+                        </div>
+
+                        <div class="test-height-container height-transition"
+                            style="height: 100px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; padding: 20px;">
+                            <p>This container demonstrates smooth height transitions. Click the buttons above to see it
+                                resize.</p>
+                            <p class="mb-0">Current height: <span id="currentHeight">100</span>px</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Initialize sample data if not exists
+            if (!localStorage.getItem("sizePackages")) {
+                const sampleData = [
+                    {
+                        "name": "men shoes",
+                        "from": "40",
+                        "to": "45",
+                        "quantity": "10",
+                        "exceptions": ["39", "46"],
+                        "date": "07/09/2025, 14:02:10"
+                    },
+                    {
+                        "name": "me shose 1",
+                        "from": "35",
+                        "to": "45",
+                        "quantity": "10",
+                        "exceptions": ["34", "47"],
+                        "date": "07/09/2025, 15:31:46"
+                    },
+                    {
+                        "name": "men shose 2",
+                        "from": "40",
+                        "to": "45",
+                        "quantity": "20",
+                        "exceptions": ["38"],
+                        "date": "07/09/2025, 15:32:00"
+                    }
+                ];
+                localStorage.setItem("sizePackages", JSON.stringify(sampleData));
+            }
+
+            // Apply transition theme to all elements
+            function applyTransitionTheme() {
+                const speed = document.getElementById('transitionSpeed').value;
+                const type = document.getElementById('transitionType').value;
+
+                // Update CSS variables
+                document.documentElement.style.setProperty('--transition-time', `${speed}s`);
+                document.documentElement.style.setProperty('--transition-type', type);
+
+                // Add transition-element class to all interactive elements
+                const interactiveElements = [
+                    'button', 'a', 'input', 'select', 'textarea',
+                    '.card', '.nav-link', '.form-control', '.form-select',
+                    '.btn', '.dropdown-item', '.list-group-item'
+                ];
+
+                interactiveElements.forEach(selector => {
+                    document.querySelectorAll(selector).forEach(el => {
+                        el.classList.add('transition-element');
+                    });
+                });
+            }
+
+            // Initialize theme
+            applyTransitionTheme();
+
+            // Update speed value display
+            document.getElementById('transitionSpeed').addEventListener('input', function () {
+                document.getElementById('speedValue').textContent = `${this.value}s`;
+                applyTransitionTheme();
+            });
+
+            // Update when transition type changes
+            document.getElementById('transitionType').addEventListener('change', applyTransitionTheme);
+
+            // Apply to all button
+            document.getElementById('applyToAll').addEventListener('click', applyTransitionTheme);
+
+            // Color mode toggle functionality
+            document.querySelectorAll('.toggle-color-mode').forEach(button => {
+                button.addEventListener('click', () => {
+                    // Update active button state
+                    document.querySelectorAll('.toggle-color-mode').forEach(btn => {
+                        btn.classList.remove('active', 'btn-primary');
+                        btn.classList.add('btn-outline-secondary');
+                    });
+                    button.classList.add('active', 'btn-primary');
+                    button.classList.remove('btn-outline-secondary');
+
+                    const mode = button.getAttribute('data-mode');
+
+                    // Show appropriate container with transition
+                    if (mode === 'picker') {
+                        document.querySelector('.color-picker-container').classList.remove('hidden-section');
+                        document.querySelector('.color-picker-container').classList.add('visible-section');
+                        document.querySelector('.color-image-container').classList.remove('visible-section');
+                        document.querySelector('.color-image-container').classList.add('hidden-section');
+                    } else {
+                        document.querySelector('.color-image-container').classList.remove('hidden-section');
+                        document.querySelector('.color-image-container').classList.add('visible-section');
+                        document.querySelector('.color-picker-container').classList.remove('visible-section');
+                        document.querySelector('.color-picker-container').classList.add('hidden-section');
+                    }
+                });
+            });
+
+            // Size toggle functionality
+            document.querySelectorAll('.size-toggle-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    // Update active button state
+                    document.querySelectorAll('.size-toggle-btn').forEach(btn => {
+                        btn.classList.remove('active', 'btn-primary');
+                        btn.classList.add('btn-outline-secondary');
+                    });
+                    button.classList.add('active', 'btn-primary');
+                    button.classList.remove('btn-outline-secondary');
+
+                    const target = button.getAttribute('data-target');
+
+                    // Show appropriate container with transition
+                    if (target === 'size-creator') {
+                        document.querySelector('.size-creator').classList.remove('hidden-section');
+                        document.querySelector('.size-creator').classList.add('visible-section');
+                        document.querySelector('.package-selector').classList.remove('visible-section');
+                        document.querySelector('.package-selector').classList.add('hidden-section');
+                    } else {
+                        document.querySelector('.package-selector').classList.remove('hidden-section');
+                        document.querySelector('.package-selector').classList.add('visible-section');
+                        document.querySelector('.size-creator').classList.remove('visible-section');
+                        document.querySelector('.size-creator').classList.add('hidden-section');
+                    }
+                });
+            });
+
+            // Package selector functionality
+            const packageSelect = document.querySelector('.package-select');
+            const sizePreview = document.querySelector('.size-preview');
+
+            packageSelect.addEventListener('change', function () {
+                const packages = JSON.parse(localStorage.getItem("sizePackages")) || [];
+                const selectedPackage = packages.find(p => p.name === this.value);
+
+                if (selectedPackage) {
+                    let exceptionsHtml = "";
+                    if (selectedPackage.exceptions && selectedPackage.exceptions.length > 0) {
+                        exceptionsHtml = `<div class="exceptions-list mt-2">
+                                <strong>Exceptions:</strong> 
+                                ${selectedPackage.exceptions.map(e => `<span class="exception-chip">${e}</span>`).join("")}
+                            </div>`;
+                    }
+
+                    sizePreview.innerHTML = `
+                            <div class="size-range"><strong>Sizes:</strong> ${selectedPackage.from} to ${selectedPackage.to}</div>
+                            <div><strong>Quantity:</strong> ${selectedPackage.quantity}</div>
+                            ${exceptionsHtml}
+                        `;
+                } else {
+                    sizePreview.innerHTML = "";
+                }
+            });
+
+            // Exception handling
+            const exceptionValue = document.querySelector('.exception-value');
+            const addExceptionBtn = document.querySelector('.add-exception');
+            const exceptionsListCreator = document.querySelector('.exceptions-list-creator');
+            let currentExceptions = [];
+
+            addExceptionBtn.addEventListener('click', function () {
+                const value = exceptionValue.value.trim();
+                if (value && !currentExceptions.includes(value)) {
+                    currentExceptions.push(value);
+                    updateExceptionsList();
+                    exceptionValue.value = "";
+                }
+            });
+
+            function updateExceptionsList() {
+                exceptionsListCreator.innerHTML = currentExceptions.map(exp => `
+                        <div class="exception-tag">
+                            ${exp}
+                            <span class="remove" data-value="${exp}">&times;</span>
+                        </div>
+                    `).join("");
+
+                // Add event listeners to remove buttons
+                exceptionsListCreator.querySelectorAll(".remove").forEach(btn => {
+                    btn.addEventListener("click", function () {
+                        const value = this.getAttribute("data-value");
+                        currentExceptions = currentExceptions.filter(e => e !== value);
+                        updateExceptionsList();
+                    });
+                });
+            }
+
+            // Save size range
+            const saveSizeBtn = document.querySelector('.save-size');
+            const fromSize = document.querySelector('.from-size');
+            const toSize = document.querySelector('.to-size');
+
+            saveSizeBtn.addEventListener('click', function () {
+                const fromVal = fromSize.value.trim();
+                const toVal = toSize.value.trim();
+
+                if (!fromVal || !toVal) {
+                    alert("Please enter both 'From' and 'To' values");
+                    return;
+                }
+
+                const packageName = prompt("Enter a name for this size package:");
+                if (!packageName) return;
+
+                const newPackage = {
+                    name: packageName,
+                    from: fromVal,
+                    to: toVal,
+                    quantity: "10", // Default value
+                    exceptions: currentExceptions,
+                    date: new Date().toLocaleString()
+                };
+
+                // Save to local storage
+                const packages = JSON.parse(localStorage.getItem("sizePackages")) || [];
+                packages.push(newPackage);
+                localStorage.setItem("sizePackages", JSON.stringify(packages));
+
+                // Update select options
+                const newOption = document.createElement("option");
+                newOption.value = newPackage.name;
+                newOption.textContent = `${newPackage.name} (${newPackage.from}-${newPackage.to})`;
+                packageSelect.appendChild(newOption);
+
+                // Select the new option
+                packageSelect.value = newPackage.name;
+                packageSelect.dispatchEvent(new Event("change"));
+
+                // Reset form
+                fromSize.value = "";
+                toSize.value = "";
+                currentExceptions = [];
+                updateExceptionsList();
+
+                alert("Size package saved successfully!");
+            });
+
+            // Test height transitions
+            document.querySelectorAll('.test-height-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const height = this.getAttribute('data-height');
+                    const container = document.querySelector('.test-height-container');
+                    const heightDisplay = document.getElementById('currentHeight');
+
+                    container.style.height = `${height}px`;
+                    heightDisplay.textContent = height;
+                });
+            });
+        });
+    
+    </script>
+</body>
+
+</html>
